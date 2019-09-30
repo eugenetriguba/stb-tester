@@ -26,7 +26,6 @@ from stbt import load_image
     # pylint: disable=line-too-long
     ("Connection-status--white-on-dark-blue.png", "Connection status: Connected", stbt.Region.ALL, None),
     ("Connection-status--white-on-dark-blue.png", "Connected", stbt.Region(x=210, y=0, width=120, height=40), None),
-    # ("Connection-status--white-on-dark-blue.png", "", None, None),  # uncomment when region=None doesn't raise -- see #433
     ("programme--white-on-black.png", "programme", stbt.Region.ALL, None),
     ("UJJM--white-text-on-grey-boxes.png", "", stbt.Region.ALL, None),
     ("UJJM--white-text-on-grey-boxes.png", "UJJM", stbt.Region.ALL, stbt.OcrMode.SINGLE_LINE),
@@ -39,7 +38,6 @@ def test_ocr_on_static_images(image, expected_text, region, mode):
     assert text == expected_text
 
 
-# Remove when region=None doesn't raise -- see #433
 def test_that_ocr_region_none_isnt_allowed():
     with pytest.raises(TypeError):
         stbt.ocr(frame=load_image("ocr/small.png"), region=None)
@@ -235,29 +233,6 @@ def test_that_text_region_is_correct_even_with_regions_larger_than_frame():
         text, frame=frame, region=region.extend(right=+12800))
     assert result
     assert region.contains(result.region)
-
-
-@pytest.mark.parametrize("region", [
-    stbt.Region(1280, 0, 1280, 720),
-    None,
-])
-def test_that_match_text_still_returns_if_region_doesnt_intersect_with_frame(
-        region):
-    frame = load_image("ocr/menu.png")
-    result = stbt.match_text("Onion Bhaji", frame=frame, region=region)
-    assert result.match is False
-    assert result.region is None
-    assert result.text == "Onion Bhaji"
-
-
-@pytest.mark.parametrize("region", [
-    stbt.Region(1280, 0, 1280, 720),
-    # None,  # uncomment when region=None doesn't raise -- see #433
-])
-def test_that_ocr_still_returns_if_region_doesnt_intersect_with_frame(region):
-    frame = load_image("ocr/menu.png")
-    result = stbt.ocr(frame=frame, region=region)
-    assert result == u''
 
 
 def test_that_match_text_returns_no_match_for_non_matching_text():

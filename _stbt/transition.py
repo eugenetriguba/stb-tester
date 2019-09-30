@@ -24,7 +24,7 @@ import cv2
 import numpy
 
 from .core import load_image
-from .imgutils import pixel_bounding_box
+from .imgutils import pixel_bounding_box, _validate_region
 from .logging import ddebug, debug, draw_on
 from .motion import MotionResult
 from .types import Region
@@ -227,11 +227,9 @@ def _ddebug(s, f, *args):
 
 
 def strict_diff(prev, frame, region, mask_image):
-    if region is not None:
-        full_frame = Region(0, 0, frame.shape[1], frame.shape[0])
-        region = Region.intersect(full_frame, region)
-        f1 = prev[region.y:region.bottom, region.x:region.right]
-        f2 = frame[region.y:region.bottom, region.x:region.right]
+    region = _validate_region(region, frame)
+    f1 = prev[region.y:region.bottom, region.x:region.right]
+    f2 = frame[region.y:region.bottom, region.x:region.right]
 
     absdiff = cv2.absdiff(f1, f2)
     if mask_image is not None:
